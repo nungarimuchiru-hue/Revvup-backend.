@@ -5,7 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Car inventory
+// Car inventory with accurate matching vehicle images
 const cars = [
   // --- BMW ---
   { 
@@ -29,13 +29,13 @@ const cars = [
   { 
     id: '4', make: 'BMW', model: 'i4 Electric', year: 2023, price: 9500000, mileage: 5000, 
     fuelType: 'Electric', engineSize: 'Electric',
-    image: 'https://images.unsplash.com/photo-1526726538690-5cbf956ae2fd?w=500',
+    image: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=500',
     description: 'An all-electric gran coupe combining instant torque, zero emissions, and signature BMW dynamics.'
   },
   { 
     id: '30', make: 'BMW', model: '740i', year: 2023, price: 13500000, mileage: 4500, 
     fuelType: 'Petrol', engineSize: '3.0L',
-    image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500',
+    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500',
     description: 'The pinnacle of executive luxury featuring a whisper-quiet 3.0L petrol engine and executive lounge seating.'
   },
 
