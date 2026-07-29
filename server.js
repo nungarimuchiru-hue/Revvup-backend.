@@ -257,8 +257,13 @@ app.post('/api/test-drives', (req, res) => {
   res.status(201).json({ message: 'Test drive booked successfully', request: newRequest });
 });
 
-// Fetch test drive notifications for the admin panel
+// Fetch test drive requests (supports filtering by email query for client booking lookup)
 app.get('/api/test-drives', (req, res) => {
+  const { email } = req.query;
+  if (email) {
+    const filtered = testDriveRequests.filter(r => r.clientEmail.toLowerCase() === email.toLowerCase());
+    return res.json(filtered);
+  }
   res.json(testDriveRequests);
 });
 
