@@ -227,7 +227,6 @@ app.get('/api/cars/:id', (req, res) => {
   });
 });
 
-// Update car status & availability from admin panel
 app.put('/api/cars/:id', (req, res) => {
   const car = cars.find(c => c.id === req.params.id);
   if (!car) return res.status(404).json({ error: 'Car not found' });
@@ -239,7 +238,6 @@ app.put('/api/cars/:id', (req, res) => {
   res.json(car);
 });
 
-// Handle test drive booking requests (saves to admin inbox with phone number support)
 app.post('/api/test-drives', (req, res) => {
   const booking = req.body;
   const newRequest = {
@@ -248,18 +246,16 @@ app.post('/api/test-drives', (req, res) => {
     carName: booking.carName,
     clientName: booking.clientName,
     clientEmail: booking.clientEmail,
-    clientPhone: booking.clientPhone || '', // Captured phone number
+    clientPhone: booking.clientPhone || '',
     date: booking.date,
     status: 'Pending Admin Review',
-    cancellationReason: '', // Added support for cancellation reasons
+    cancellationReason: '',
     createdAt: new Date()
   };
   testDriveRequests.unshift(newRequest);
-  console.log('Test drive booked:', newRequest);
   res.status(201).json({ message: 'Test drive booked successfully', request: newRequest });
 });
 
-// Fetch test drive requests (supports filtering by search, email, or phone query)
 app.get('/api/test-drives', (req, res) => {
   const { email, phone, search } = req.query;
 
@@ -285,7 +281,6 @@ app.get('/api/test-drives', (req, res) => {
   res.json(testDriveRequests);
 });
 
-// Update test drive request status from admin panel (supports cancellationReason)
 app.put('/api/test-drives/:id', (req, res) => {
   const requestId = Number(req.params.id);
   const request = testDriveRequests.find(r => r.id === requestId);
@@ -296,14 +291,13 @@ app.put('/api/test-drives/:id', (req, res) => {
   
   if (cancellationReason !== undefined) {
     request.cancellationReason = cancellationReason;
-  } else if (status !== 'Cancelled ❌') {
-    request.cancellationReason = ''; // Clear reason if un-cancelled
+  } else if (status !== 'Cancelled') {
+    request.cancellationReason = '';
   }
 
   res.json(request);
 });
 
-// Delete a test drive booking request
 app.delete('/api/test-drives/:id', (req, res) => {
   const requestId = Number(req.params.id);
   const index = testDriveRequests.findIndex(r => r.id === requestId);
