@@ -262,6 +262,18 @@ app.get('/api/test-drives', (req, res) => {
   res.json(testDriveRequests);
 });
 
+// Update test drive request status from admin panel
+app.put('/api/test-drives/:id', (req, res) => {
+  const requestId = Number(req.params.id);
+  const request = testDriveRequests.find(r => r.id === requestId);
+  if (!request) return res.status(404).json({ error: 'Test drive request not found' });
+
+  const { status } = req.body;
+  if (status !== undefined) request.status = status;
+
+  res.json(request);
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
