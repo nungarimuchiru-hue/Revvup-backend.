@@ -8,7 +8,7 @@ app.use(express.json());
 // Car inventory
 const cars = [
   // --- BMW ---
- { 
+  { 
     id: '1', make: 'BMW', model: 'X5', year: 2023, price: 8500000, mileage: 12000, 
     fuelType: 'Diesel', engineSize: '3.0L',
     image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500',
@@ -203,24 +203,66 @@ const cars = [
     description: 'An adventure-ready 4x4 off-road SUV featuring a high-torque 2.7L petrol engine designed to conquer rough terrain.'
   }
 ];
+
+// Storage for test drive notifications
+let testDriveRequests = [];
+
 // API Endpoints
 app.get('/api/cars', (req, res) => {
-  res.json(cars);
+  const carsWithStatus = cars.map(c => ({
+    ...c,
+    status: c.status || 'available',
+    isAvailable: c.isAvailable !== undefined ? c.isAvailable : true
+  }));
+  res.json(carsWithStatus);
 });
 
 app.get('/api/cars/:id', (req, res) => {
   const car = cars.find(c => c.id === req.params.id);
   if (!car) return res.status(404).json({ error: 'Car not found'});
+  res.json({
+    ...car,
+    status: car.status || 'available',
+    isAvailable: car.isAvailable !== undefined ? car.isAvailable : true
+  });
+});
+
+// Update car status & availability from admin panel
+app.put('/api/cars/:id', (req, res) => {
+  const car = cars.find(c => c.id === req.params.id);
+  if (!car) return res.status(404).json({ error: 'Car not found' });
+
+  const { status, isAvailable } = req.body;
+  if (status !== undefined) car.status = status;
+  if (isAvailable !== undefined) car.isAvailable = isAvailable;
+
   res.json(car);
 });
 
+// Handle test drive booking requests (saves to admin inbox)
 app.post('/api/test-drives', (req, res) => {
   const booking = req.body;
-  console.log('Test drive booked:', booking);
-  res.status(201).json({ message: 'Test drive booked successfully', booking});
+  const newRequest = {
+    id: Date.now(),
+    carId: booking.carId,
+    carName: booking.carName,
+    clientName: booking.clientName,
+    clientEmail: booking.clientEmail,
+    date: booking.date,
+    status: 'Pending Admin Review',
+    createdAt: new Date()
+  };
+  testDriveRequests.unshift(newRequest);
+  console.log('Test drive booked:', newRequest);
+  res.status(201).json({ message: 'Test drive booked successfully', request: newRequest });
 });
 
-const PORT = Process.env.PORT || 5000;
+// Fetch test drive notifications for the admin panel
+app.get('/api/test-drives', (req, res) => {
+  res.json(testDriveRequests);
+});
+
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log('Backened server running on http://localhost:${PORT}');
+  console.log(`Backend server running on http://localhost:${PORT}`);
 });
