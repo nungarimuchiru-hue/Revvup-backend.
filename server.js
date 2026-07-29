@@ -296,6 +296,19 @@ app.put('/api/test-drives/:id', (req, res) => {
   res.json(request);
 });
 
+// Delete a test drive booking request
+app.delete('/api/test-drives/:id', (req, res) => {
+  const requestId = Number(req.params.id);
+  const index = testDriveRequests.findIndex(r => r.id === requestId);
+  
+  if (index === -1) {
+    return res.status(404).json({ error: 'Test drive request not found' });
+  }
+
+  const deleted = testDriveRequests.splice(index, 1);
+  res.json({ message: 'Test drive deleted successfully', request: deleted[0] });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
