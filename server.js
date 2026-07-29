@@ -239,7 +239,7 @@ app.put('/api/cars/:id', (req, res) => {
   res.json(car);
 });
 
-// Handle test drive booking requests (saves to admin inbox)
+// Handle test drive booking requests (saves to admin inbox with phone number support)
 app.post('/api/test-drives', (req, res) => {
   const booking = req.body;
   const newRequest = {
@@ -248,6 +248,7 @@ app.post('/api/test-drives', (req, res) => {
     carName: booking.carName,
     clientName: booking.clientName,
     clientEmail: booking.clientEmail,
+    clientPhone: booking.clientPhone || '', // Captured phone number
     date: booking.date,
     status: 'Pending Admin Review',
     createdAt: new Date()
@@ -257,13 +258,29 @@ app.post('/api/test-drives', (req, res) => {
   res.status(201).json({ message: 'Test drive booked successfully', request: newRequest });
 });
 
-// Fetch test drive requests (supports filtering by email query for client booking lookup)
+// Fetch test drive requests (supports filtering by search, email, or phone query)
 app.get('/api/test-drives', (req, res) => {
-  const { email } = req.query;
-  if (email) {
-    const filtered = testDriveRequests.filter(r => r.clientEmail.toLowerCase() === email.toLowerCase());
+  const { email, phone, search } = req.query;
+
+  if (search) {
+    const query = search.toLowerCase().trim();
+    const filtered = testDriveRequests.filter(r => 
+      (r.clientEmail && r.clientEmail.toLowerCase().includes(query)) ||
+      (r.clientPhone && r.clientPhone.toLowerCase().includes(query))
+    );
     return res.json(filtered);
   }
+
+  if (email) {
+    const filtered = testDriveRequests.filter(r => r.clientEmail && r.clientEmail.toLowerCase() === email.toLowerCase().trim());
+    return res.json(filtered);
+  }
+
+  if (phone) {
+    const filtered = testDriveRequests.filter(r => r.clientPhone && r.clientPhone.toLowerCase() === phone.toLowerCase().trim());
+    return res.json(filtered);
+  }
+
   res.json(testDriveRequests);
 });
 
