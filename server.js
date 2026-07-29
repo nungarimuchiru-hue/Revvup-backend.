@@ -251,6 +251,7 @@ app.post('/api/test-drives', (req, res) => {
     clientPhone: booking.clientPhone || '', // Captured phone number
     date: booking.date,
     status: 'Pending Admin Review',
+    cancellationReason: '', // Added support for cancellation reasons
     createdAt: new Date()
   };
   testDriveRequests.unshift(newRequest);
@@ -284,14 +285,20 @@ app.get('/api/test-drives', (req, res) => {
   res.json(testDriveRequests);
 });
 
-// Update test drive request status from admin panel
+// Update test drive request status from admin panel (supports cancellationReason)
 app.put('/api/test-drives/:id', (req, res) => {
   const requestId = Number(req.params.id);
   const request = testDriveRequests.find(r => r.id === requestId);
   if (!request) return res.status(404).json({ error: 'Test drive request not found' });
 
-  const { status } = req.body;
+  const { status, cancellationReason } = req.body;
   if (status !== undefined) request.status = status;
+  
+  if (cancellationReason !== undefined) {
+    request.cancellationReason = cancellationReason;
+  } else if (status !== 'Cancelled ❌') {
+    request.cancellationReason = ''; // Clear reason if un-cancelled
+  }
 
   res.json(request);
 });
